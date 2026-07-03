@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Menü | Lezzet Durağı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Cıvıl Cıvıl Renk Paleti */
+        :root {
+            --bg-color: #FFF8F3; /* Çok hafif, sıcak krem rengi arka plan */
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sıcak ve Enerjik Üst Menü */
+        .navbar {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar p {
+            margin: 5px 0 0 0;
+            font-size: 15px;
+            opacity: 0.9;
+        }
+
+        .table-badge {
+            display: inline-block;
+            background-color: #FFF;
+            color: #FF6B6B;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 800;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Ana İçerik Konteyneri */
+        .container {
+            max-width: 800px;
+            margin: -20px auto 0 auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #FF6B6B;
+            margin: 0;
+        }
+
+        /* Enerjik Grid ve Kart Yapısı */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .category-card {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px 15px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Zıplama efekti */
+            border: 2px solid transparent;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 25px rgba(255, 107, 107, 0.15);
+            border-color: #FFEAA7;
+        }
+
+        /* İkonların içine oturacağı renkli daireler */
+        .category-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            font-size: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .category-card:hover .category-icon-wrapper {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .category-name {
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        /* Durum Mesajları */
+        .status-message {
+            text-align: center;
+            padding: 40px;
+            color: #B2BEC3;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>🍽️ Lezzet Durağı</h1>
+        <p>Siparişinizi kolayca verin!</p>
+        <div class="table-badge"><i class="fa-solid fa-chair"></i> Masa 4</div>
+    </nav>
+
+    <main class="container">
+        <div class="section-header">
+            <h2>Nefis Menümüz</h2>
+        </div>
+        
+        <div id="categories-container" class="category-grid">
+            <div class="status-message">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px; color: #FF6B6B; margin-bottom: 10px;"></i><br>
+                Lezzetler hazırlanıyor...
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCategories();
+        });
+
+        function fetchCategories() {
+            fetch('http://localhost:8080/api/categories')
+                .then(response => {
+                    if (!response.ok) throw new Error('Ağ yanıtı olumsuz oldu');
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('categories-container');
+                    container.innerHTML = ''; 
+
+                    if(data.length === 0) {
+                        container.innerHTML = '<div class="status-message">Henüz menüye kategori eklenmemiş.</div>';
+                        return;
+                    }
+
+                    data.forEach(category => {
+                        const card = document.createElement('div');
+                        card.className = 'category-card';
+                        
+                        // İsimlere Göre Özel Renkler ve İkonlar
+                        let iconClass = 'fa-solid fa-star';
+                        let iconColor = '#FD79A8'; // İkon Rengi
+                        let bgColor = '#FFEAA7';   // Daire Arka Plan Rengi
+
+                        // TÜRKÇE KARAKTER UYUMU BURADA SAĞLANDI
+                        const nameLower = category.name.toLocaleLowerCase('tr-TR');
+                        
+                        if(nameLower.includes('içecek')) {
+                            iconClass = 'fa-solid fa-glass-water-droplet';
+                            iconColor = '#0984E3'; // Ferah Mavi
+                            bgColor = '#74B9FF33'; 
+                        }
+                        else if(nameLower.includes('tatlı')) {
+                            iconClass = 'fa-solid fa-ice-cream';
+                            iconColor = '#E84393'; // Tatlı Pembe
+                            bgColor = '#FD79A833'; 
+                        }
+                        else if(nameLower.includes('salata')) {
+                            iconClass = 'fa-solid fa-leaf';
+                            iconColor = '#00B894'; // Canlı Yeşil
+                            bgColor = '#55E6C133';
+                        }
+                        else if(nameLower.includes('ana')) {
+                            iconClass = 'fa-solid fa-burger';
+                            iconColor = '#D63031'; // İştah Açıcı Kırmızı
+                            bgColor = '#FF767533';
+                        }
+
+                        card.innerHTML = `
+                            <div class="category-icon-wrapper" style="color: ${iconColor}; background-color: ${bgColor};">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <div class="category-name" style="color: ${iconColor}">${category.name}</div>
+                        `;
+                        
+                        card.onclick = () => alert(category.name + ' menüsü çok yakında eklenecek!');
+                        
+                        container.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    const container = document.getElementById('categories-container');
+                    container.innerHTML = `
+                        <div class="status-message" style="color: #D63031;">
+                            <b>Sisteme Bağlanılamadı!</b><br>
+                            Lütfen uygulamanın arka planda çalıştığından emin olun.
+                        </div>
+                    `;
+                });
+        }
+    </script>
+
+</body>
+</html>
