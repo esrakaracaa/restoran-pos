@@ -27,8 +27,17 @@ public class SecurityConfig {
         http
             .cors().and().csrf().disable()
             .authorizeHttpRequests()
-                // 1. YENİ EKLENEN: ÖN YÜZ (HTML/CSS/JS) DOSYALARINA ŞİFRESİZ İZİN VER
-                .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js").permitAll()
+                // 1. ÖN YÜZ DOSYALARI İÇİN GENİŞLETİLMİŞ İZİNLER
+                .requestMatchers(
+                    "/", 
+                    "/index.html", 
+                    "/**/*.html",  // Tüm klasörlerdeki HTML dosyaları
+                    "/**/*.css",   // Tüm klasörlerdeki CSS dosyaları
+                    "/**/*.js",    // Tüm klasörlerdeki JS dosyaları
+                    "/images/**",  // İleride eklenebilecek görseller
+                    "/favicon.ico", 
+                    "/error"       // Olası arka plan hatalarını 403 yerine görebilmek için
+                ).permitAll()
 
                 // 2. HERKESE AÇIK API YOLLARI
                 .requestMatchers("/api/auth/**").permitAll()

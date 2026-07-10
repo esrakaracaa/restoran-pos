@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş Al | Lezzet Durağı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF8F3;
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+            --primary-color: #FF6B6B;
+            --primary-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            --secondary-color: #00B894;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SOL TARAF: Menü ve Ürünler */
+        .menu-section {
+            flex: 2;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid #FFEAA7;
+            background-color: #FAFAFA;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: white;
+            border: 2px solid #DFE6E9;
+            padding: 10px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            color: #636E72;
+            text-decoration: none;
+        }
+
+        .category-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cat-btn {
+            background: white;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            white-space: nowrap;
+        }
+        
+        .cat-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .product-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .product-card:hover {
+            border-color: var(--secondary-color);
+            transform: translateY(-5px);
+        }
+
+        .product-price {
+            color: var(--secondary-color);
+            font-weight: 800;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        /* SAĞ TARAF: Sepet ve Adisyon */
+        .cart-section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.02);
+        }
+
+        .table-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 0 0 20px 0;
+            text-align: center;
+            border-bottom: 2px dashed #DFE6E9;
+            padding-bottom: 15px;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #F1F2F6;
+            font-weight: 600;
+        }
+
+        .cart-total {
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .confirm-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 184, 148, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .confirm-btn:disabled {
+            background: #B2BEC3;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-section">
+        <div class="header-bar">
+            <a href="/waiter.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Masalara Dön</a>
+            <h2>Menü</h2>
+        </div>
+
+        <div id="category-container" class="category-list">
+            <button class="cat-btn active" onclick="filterByCategory(null, this)">Tümü</button>
+        </div>
+
+        <div id="products-container" class="products-grid">
+            <div style="grid-column: 1 / -1; text-align:center; color: #B2BEC3; padding: 40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px;"></i><br>Lezzetler Yükleniyor...
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-section">
+        <h2 id="tableNameDisplay" class="table-title">Masa ...</h2>
+        
+        <div id="cart-container" class="cart-items">
+            <div style="text-align:center; color:#B2BEC3; margin-top:50px;">
+                <i class="fa-solid fa-basket-shopping" style="font-size: 40px; margin-bottom:10px;"></i><br>
+                Adisyon şu an boş
+            </div>
+        </div>
+
+        <div class="cart-total">
+            <span>Toplam:</span>
+            <span id="totalPrice">0.00 ₺</span>
+        </div>
+
+        <button class="confirm-btn" onclick="submitOrder()">
+            <i class="fa-solid fa-bell-concierge"></i> Siparişi Onayla
+        </button>
+    </div>
+
+    <script>
+        // GÜVENLİK VE URL PARAMETRELERİ
+        const token = localStorage.getItem('jwtToken');
+        if (!token) window.location.href = '/login.html';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tableId = urlParams.get('tableId');
+        const tableName = urlParams.get('tableName');
+        
+        document.getElementById('tableNameDisplay').innerText = tableName || "Masa Seçilmedi";
+
+        // Global Değişkenler
+        let allMenuItems = [];
+        let cart = []; // Sepetimiz
+
+        // 1. VERİLERİ ÇEK
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCategories();
+            fetchMenuItems();
+        });
+
+        // Kategorileri Getir
+        function fetchCategories() {
+            fetch('/api/categories')
+                .then(res => res.json())
+                .then(categories => {
+                    const container = document.getElementById('category-container');
+                    categories.forEach(cat => {
+                        const btn = document.createElement('button');
+                        btn.className = 'cat-btn';
+                        btn.innerText = cat.name;
+                        btn.onclick = () => filterByCategory(cat.id, btn);
+                        container.appendChild(btn);
+                    });
+                });
+        }
+
+        // Ürünleri Getir
+        function fetchMenuItems() {
+            fetch('/api/menu-items')
+                .then(res => res.json())
+                .then(items => {
+                    allMenuItems = items;
+                    renderProducts(allMenuItems);
+                });
+        }
+
+        // 2. ÜRÜNLERİ EKRANA ÇİZ
+        function renderProducts(items) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            
+            if(items.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1 / -1; text-align:center;">Bu kategoride henüz ürün yok.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div style="font-weight: 800; font-size: 16px;">${item.name}</div>
+                    <div style="font-size: 12px; color: #B2BEC3; margin-top:5px;">${item.description || ''}</div>
+                    <div class="product-price">${item.price} ₺</div>
+                `;
+                card.onclick = () => addToCart(item);
+                container.appendChild(card);
+            });
+        }
+
+        // Kategori Filtreleme
+        function filterByCategory(categoryId, clickedBtn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            if(clickedBtn) clickedBtn.classList.add('active');
+
+            let filteredItems = allMenuItems;
+            if(categoryId !== null) {
+                filteredItems = allMenuItems.filter(item => item.category && item.category.id === categoryId);
+            }
+            renderProducts(filteredItems);
+        }
+
+        // 3. SEPET (ADİSYON) İŞLEMLERİ
+        function addToCart(item) {
+            const existingItem = cart.find(c => c.id === item.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...item, quantity: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-container');
+            const totalDisplay = document.getElementById('totalPrice');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#B2BEC3; margin-top:50px;"><i class="fa-solid fa-basket-shopping" style="font-size: 40px; margin-bottom:10px;"></i><br>Adisyon şu an boş</div>';
+                totalDisplay.innerText = "0.00 ₺";
+                return;
+            }
+
+            container.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((cartItem, index) => {
+                total += cartItem.price * cartItem.quantity;
+                
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div style="flex:2;">${cartItem.name}</div>
+                    <div style="flex:1; text-align:center;">x${cartItem.quantity}</div>
+                    <div style="flex:1; text-align:right;">${(cartItem.price * cartItem.quantity).toFixed(2)} ₺</div>
+                    <i class="fa-solid fa-trash" style="color: #FF7675; margin-left: 10px; cursor: pointer;" onclick="removeFromCart(${index})"></i>
+                `;
+                container.appendChild(div);
+            });
+
+            totalDisplay.innerText = total.toFixed(2) + " ₺";
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        // 4. SİPARİŞİ ONAYLAMA VE VERİTABANINA KAYDETME
+        async function submitOrder() {
+            if(cart.length === 0) {
+                alert("Önce sepete ürün eklemelisiniz!");
+                return;
+            }
+
+            const confirmBtn = document.querySelector('.confirm-btn');
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sipariş İletiliyor...';
+            confirmBtn.disabled = true;
+
+            try {
+                // Adım 1: Giriş yapan kullanıcının (Garson) bilgilerini backend'den al
+                const username = localStorage.getItem('username');
+                const userRes = await fetch(`http://localhost:8080/api/users/${username}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!userRes.ok) throw new Error("Kullanıcı bilgisi alınamadı!");
+                const user = await userRes.json();
+
+                // Adım 2: Yeni bir "Order" (Sipariş) oluştur
+                const orderRes = await fetch('http://localhost:8080/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        table: { id: tableId },
+                        user: user // İŞTE GÜNCELLEDİĞİMİZ KISIM: Sadece id değil, tüm user objesini gönderiyoruz.
+                    })
+                });
+                if (!orderRes.ok) throw new Error("Sipariş oluşturulamadı!");
+                const order = await orderRes.json();
+
+                // Adım 3: Sepetteki (cart) her bir ürünü OrderItem olarak veritabanına kaydet
+                for (const item of cart) {
+                    await fetch('http://localhost:8080/api/order-items', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            quantity: item.quantity,
+                            priceAtOrder: item.price,
+                            menuItem: { id: item.id },
+                            order: { id: order.id }
+                        })
+                    });
+                }
+
+                // Adım 4: Masanın durumunu "DOLU" olarak güncelle
+                await fetch(`http://localhost:8080/api/tables/${tableId}/status?status=DOLU`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                // Başarılı!
+                alert("Sipariş başarıyla mutfağa iletildi!");
+                window.location.href = '/waiter.html';
+
+            } catch (error) {
+                console.error("Sipariş Hatası:", error);
+                alert("Hata: " + error.message);
+                
+                // Butonu eski haline getir
+                confirmBtn.innerHTML = '<i class="fa-solid fa-bell-concierge"></i> Siparişi Onayla';
+                confirmBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

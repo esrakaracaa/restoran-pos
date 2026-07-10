@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garson Paneli | Lezzet Durağı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF8F3;
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+            --primary-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            --empty-color: #55E6C1; /* Yeşil - Boş */
+            --full-color: #FF7675;  /* Kırmızı - Dolu */
+            --reserved-color: #FDCB6E; /* Sarı - Rezerve */
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Üst Menü (Navbar) */
+        .navbar {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2);
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Ana İçerik ve Masa Grid'i */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #FF6B6B;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        /* Masa Kartları */
+        .table-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-bottom: 5px solid transparent;
+        }
+
+        .table-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+        }
+
+        .table-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .table-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .table-capacity {
+            font-size: 14px;
+            color: #B2BEC3;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .table-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 800;
+            color: white;
+        }
+
+        /* Durumlara Göre Dinamik Renkler */
+        .status-bos {
+            border-bottom-color: var(--empty-color);
+        }
+        .status-bos .table-icon { color: var(--empty-color); }
+        .status-bos .table-status { background-color: var(--empty-color); }
+
+        .status-dolu {
+            border-bottom-color: var(--full-color);
+        }
+        .status-dolu .table-icon { color: var(--full-color); }
+        .status-dolu .table-status { background-color: var(--full-color); }
+
+        .status-rezerve {
+            border-bottom-color: var(--reserved-color);
+        }
+        .status-rezerve .table-icon { color: var(--reserved-color); }
+        .status-rezerve .table-status { background-color: var(--reserved-color); }
+
+        .error-message {
+            text-align: center;
+            color: #D63031;
+            font-weight: 600;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>🍽️ Lezzet Durağı</h1>
+        <div class="user-info">
+            <span><i class="fa-solid fa-user-circle"></i> <span id="userNameDisplay">Personel</span></span>
+            <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="section-title">Masa Durumları</div>
+        
+        <div id="table-container" class="table-grid">
+            <div style="text-align:center; grid-column: 1 / -1; color: #B2BEC3;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px;"></i><br><br>Masalar Yükleniyor...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. GÜVENLİK KONTROLÜ: Token var mı?
+        const token = localStorage.getItem('jwtToken');
+        const username = localStorage.getItem('username');
+
+        if (!token) {
+            alert("Lütfen önce giriş yapın!");
+            window.location.href = '/login.html';
+        }
+
+        // Kullanıcı adını ekrana yazdır
+        if (username) {
+            document.getElementById('userNameDisplay').innerText = username;
+        }
+
+        // 2. MASALARI BACKEND'DEN ÇEK
+        function loadTables() {
+            fetch('http://localhost:8080/api/tables', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error("Yetkisiz erişim. Oturumunuz süresi dolmuş olabilir.");
+                }
+                if (!response.ok) throw new Error("Masalar yüklenemedi!");
+                return response.json();
+            })
+            .then(tables => {
+                const container = document.getElementById('table-container');
+                container.innerHTML = ''; // Yükleniyor yazısını temizle
+
+                if (tables.length === 0) {
+                    container.innerHTML = '<div class="error-message">Henüz hiç masa eklenmemiş.</div>';
+                    return;
+                }
+
+                tables.forEach(table => {
+                    // Duruma göre CSS sınıflarını belirle
+                    let statusClass = '';
+                    let statusText = table.status;
+                    let iconClass = 'fa-solid fa-utensils';
+
+                    if (table.status === 'BOŞ') {
+                        statusClass = 'status-bos';
+                    } else if (table.status === 'DOLU') {
+                        statusClass = 'status-dolu';
+                    } else if (table.status === 'REZERVE') {
+                        statusClass = 'status-rezerve';
+                        iconClass = 'fa-solid fa-calendar-check';
+                    }
+
+                    // HTML Kartını oluştur
+                    const card = document.createElement('div');
+                    card.className = `table-card ${statusClass}`;
+                    card.innerHTML = `
+                        <div class="table-icon"><i class="${iconClass}"></i></div>
+                        <div class="table-name">${table.tableName}</div>
+                        <div class="table-capacity"><i class="fa-solid fa-users"></i> Kapasite: ${table.capacity}</div>
+                        <div class="table-status">${statusText}</div>
+                    `;
+
+                    // Masaya tıklayınca URL parametreleri ile sipariş sayfasına yönlendir
+                    card.onclick = () => {
+                        window.location.href = `/order.html?tableId=${table.id}&tableName=${table.tableName}`;
+                    };
+
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                document.getElementById('table-container').innerHTML = `
+                    <div class="error-message">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 40px; margin-bottom: 15px;"></i><br>
+                        ${error.message}<br>Lütfen tekrar giriş yapmayı deneyin.
+                    </div>
+                `;
+            });
+        }
+
+        // 3. ÇIKIŞ YAPMA İŞLEMİ
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('username');
+            window.location.href = '/login.html';
+        }
+
+        // Sayfa yüklendiğinde masaları çekmeye başla
+        document.addEventListener('DOMContentLoaded', loadTables);
+    </script>
+</body>
+</html>

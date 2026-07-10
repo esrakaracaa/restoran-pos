@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personel Girişi | Lezzet Durağı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF8F3; 
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+            --primary-color: #FF6B6B;
+            --primary-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background-color: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(255, 107, 107, 0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo-area {
+            margin-bottom: 30px;
+        }
+
+        .logo-area h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-area p {
+            color: #B2BEC3;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #B2BEC3;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #F1F2F6;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.2);
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .error-message {
+            color: #D63031;
+            background-color: #FF767533;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none; /* Başlangıçta gizli */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo-area">
+            <h1>🍽️ Lezzet Durağı</h1>
+            <p>Personel Giriş Sistemi</p>
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            <i class="fa-solid fa-circle-exclamation"></i> <span id="errorText">Kullanıcı adı veya şifre hatalı!</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="username" placeholder="Kullanıcı Adı" required autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="password" placeholder="Şifre" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="submitBtn">
+                <i class="fa-solid fa-right-to-bracket"></i> Giriş Yap
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Sayfanın yenilenmesini engelle
+
+            const usernameVal = document.getElementById('username').value;
+            const passwordVal = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Butonu yükleniyor durumuna al
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kontrol Ediliyor...';
+            submitBtn.disabled = true;
+            errorDiv.style.display = 'none';
+
+            // Senin AuthController'a istek atıyoruz
+            fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: usernameVal,
+                    password: passwordVal
+                })
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorMsg = await response.text(); // Backend'den gelen metin
+                    throw new Error(errorMsg || "Giriş başarısız oldu.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Giriş Başarılı!
+                // Token ve kullanıcı bilgilerini tarayıcıya kaydet
+                localStorage.setItem('jwtToken', data.token);
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('username', data.username);
+
+                // Role göre yönlendirme yap
+                if (data.role === 'ADMIN' || data.role === 'ROLE_ADMIN') {
+                    window.location.href = '/admin.html';
+                } else {
+                    window.location.href = '/waiter.html'; // Garson/Kasiyer ekranı
+                }
+            })
+            .catch(error => {
+                // Hata durumu
+                errorText.innerText = error.message;
+                errorDiv.style.display = 'block';
+                
+                // Butonu eski haline getir
+                submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Giriş Yap';
+                submitBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
