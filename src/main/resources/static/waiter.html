@@ -245,8 +245,16 @@
 
                     // Masaya tıklayınca URL parametreleri ile sipariş sayfasına yönlendir
                     card.onclick = () => {
-                        window.location.href = `/order.html?tableId=${table.id}&tableName=${table.tableName}`;
-                    };
+    if (table.status === 'DOLU') {
+        // Dolu masaya tıklanırsa hesabı getir
+        alert("Hesap ekranına yönlendiriliyorsunuz...");
+        // Burada basit bir örnek için toplamı 0.00 varsaydık, backend'den çekerek geliştirebilirsin
+        window.location.href = `/bill.html?tableId=${table.id}&billId=1&total=250.00`;
+    } else {
+        // Boş masaya tıklanırsa sipariş al
+        window.location.href = `/order.html?tableId=${table.id}&tableName=${table.tableName}`;
+    }
+};
 
                     container.appendChild(card);
                 });
