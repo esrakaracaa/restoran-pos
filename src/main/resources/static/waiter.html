@@ -15,6 +15,7 @@
             --empty-color: #55E6C1; /* Yeşil - Boş */
             --full-color: #FF7675;  /* Kırmızı - Dolu */
             --reserved-color: #FDCB6E; /* Sarı - Rezerve */
+            --checkout-color: #00B894;
         }
 
         body {
@@ -132,21 +133,15 @@
         }
 
         /* Durumlara Göre Dinamik Renkler */
-        .status-bos {
-            border-bottom-color: var(--empty-color);
-        }
+        .status-bos { border-bottom-color: var(--empty-color); }
         .status-bos .table-icon { color: var(--empty-color); }
         .status-bos .table-status { background-color: var(--empty-color); }
 
-        .status-dolu {
-            border-bottom-color: var(--full-color);
-        }
+        .status-dolu { border-bottom-color: var(--full-color); }
         .status-dolu .table-icon { color: var(--full-color); }
         .status-dolu .table-status { background-color: var(--full-color); }
 
-        .status-rezerve {
-            border-bottom-color: var(--reserved-color);
-        }
+        .status-rezerve { border-bottom-color: var(--reserved-color); }
         .status-rezerve .table-icon { color: var(--reserved-color); }
         .status-rezerve .table-status { background-color: var(--reserved-color); }
 
@@ -156,9 +151,129 @@
             font-weight: 600;
             margin-top: 50px;
         }
+
+        /* PROFESYONEL ÖZEL MODAL (AÇILIR PENCERE) TASARIMI */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* Başlangıçta gizli */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        
+        .modal-header p {
+            color: #B2BEC3;
+            margin: 5px 0 0 0;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-btn {
+            padding: 16px;
+            border-radius: 15px;
+            border: none;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-add-order {
+            background: var(--primary-gradient);
+            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-checkout {
+            background: var(--checkout-color);
+            box-shadow: 0 8px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #636E72;
+            border: 2px solid #DFE6E9;
+        }
+
+        .modal-btn:hover:not(.btn-cancel) {
+            transform: translateY(-2px);
+        }
+        
+        .btn-cancel:hover {
+            background: #F1F2F6;
+        }
     </style>
 </head>
 <body>
+
+    <!-- PROFESYONEL MODAL HTML YAPISI -->
+    <div id="actionModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTableTitle">Masa Seçimi</h3>
+                <p>Lütfen yapmak istediğiniz işlemi seçin</p>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn btn-add-order" onclick="navigateToAddOrder()">
+                    <i class="fa-solid fa-plus"></i> Yeni Ürün Ekle
+                </button>
+                <button class="modal-btn btn-checkout" onclick="navigateToCheckout()">
+                    <i class="fa-solid fa-receipt"></i> Hesabı Kapat
+                </button>
+                <button class="modal-btn btn-cancel" onclick="closeModal()">
+                    İptal Et
+                </button>
+            </div>
+        </div>
+    </div>
 
     <nav class="navbar">
         <h1>🍽️ Lezzet Durağı</h1>
@@ -186,16 +301,20 @@
         if (!token) {
             alert("Lütfen önce giriş yapın!");
             window.location.href = '/login.html';
+        } else {
+            if (username) {
+                document.getElementById('userNameDisplay').innerText = username;
+            }
+            document.addEventListener('DOMContentLoaded', loadTables);
         }
 
-        // Kullanıcı adını ekrana yazdır
-        if (username) {
-            document.getElementById('userNameDisplay').innerText = username;
-        }
+        // Modal için geçici değişkenler
+        let selectedTableId = null;
+        let selectedTableName = "";
 
         // 2. MASALARI BACKEND'DEN ÇEK
         function loadTables() {
-            fetch('http://localhost:8080/api/tables', {
+            fetch('/api/tables', {
                 method: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -211,7 +330,7 @@
             })
             .then(tables => {
                 const container = document.getElementById('table-container');
-                container.innerHTML = ''; // Yükleniyor yazısını temizle
+                container.innerHTML = ''; 
 
                 if (tables.length === 0) {
                     container.innerHTML = '<div class="error-message">Henüz hiç masa eklenmemiş.</div>';
@@ -219,7 +338,6 @@
                 }
 
                 tables.forEach(table => {
-                    // Duruma göre CSS sınıflarını belirle
                     let statusClass = '';
                     let statusText = table.status;
                     let iconClass = 'fa-solid fa-utensils';
@@ -233,7 +351,6 @@
                         iconClass = 'fa-solid fa-calendar-check';
                     }
 
-                    // HTML Kartını oluştur
                     const card = document.createElement('div');
                     card.className = `table-card ${statusClass}`;
                     card.innerHTML = `
@@ -243,18 +360,18 @@
                         <div class="table-status">${statusText}</div>
                     `;
 
-                    // Masaya tıklayınca URL parametreleri ile sipariş sayfasına yönlendir
+                    // Masaya Tıklanma Olayı
                     card.onclick = () => {
-    if (table.status === 'DOLU') {
-        // Dolu masaya tıklanırsa hesabı getir
-        alert("Hesap ekranına yönlendiriliyorsunuz...");
-        // Burada basit bir örnek için toplamı 0.00 varsaydık, backend'den çekerek geliştirebilirsin
-        window.location.href = `/bill.html?tableId=${table.id}&billId=1&total=250.00`;
-    } else {
-        // Boş masaya tıklanırsa sipariş al
-        window.location.href = `/order.html?tableId=${table.id}&tableName=${table.tableName}`;
-    }
-};
+                        const encodedTableName = encodeURIComponent(table.tableName);
+                        
+                        if (table.status === 'DOLU') {
+                            // AMATÖR ALERTLER YERİNE PROFESYONEL MODALI AÇIYORUZ
+                            openModal(table.id, table.tableName);
+                        } else {
+                            // Boş veya rezerve masaya tıklanırsa direkt sipariş al
+                            window.location.href = `/order.html?tableId=${table.id}&tableName=${encodedTableName}`;
+                        }
+                    };
 
                     container.appendChild(card);
                 });
@@ -270,16 +387,45 @@
             });
         }
 
-        // 3. ÇIKIŞ YAPMA İŞLEMİ
-        function logout() {
-            localStorage.removeItem('jwtToken');
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('username');
-            window.location.href = '/login.html';
+        // --- PROFESYONEL MODAL FONKSİYONLARI ---
+        function openModal(id, name) {
+            selectedTableId = id;
+            selectedTableName = name;
+            
+            document.getElementById('modalTableTitle').innerText = name + " Menüsü";
+            const modal = document.getElementById('actionModal');
+            
+            modal.style.display = 'flex';
+            // CSS Animasyonu için ufak bir gecikme
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
         }
 
-        // Sayfa yüklendiğinde masaları çekmeye başla
-        document.addEventListener('DOMContentLoaded', loadTables);
+        function closeModal() {
+            const modal = document.getElementById('actionModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // Animasyon süresi kadar bekle
+        }
+
+        function navigateToAddOrder() {
+            const encoded = encodeURIComponent(selectedTableName);
+            window.location.href = `/order.html?tableId=${selectedTableId}&tableName=${encoded}`;
+        }
+
+        function navigateToCheckout() {
+            const encoded = encodeURIComponent(selectedTableName);
+            window.location.href = `/bill.html?tableId=${selectedTableId}&tableName=${encoded}`;
+        }
+        // ---------------------------------------
+
+        // 3. ÇIKIŞ YAPMA İŞLEMİ
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
     </script>
 </body>
 </html>

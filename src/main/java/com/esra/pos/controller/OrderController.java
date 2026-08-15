@@ -32,4 +32,10 @@ public class OrderController {
     public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
     }
+
+    // --- YENİ EKLENEN KISIM: Masaya göre sipariş getirme ---
+    @GetMapping("/table/{tableId}")
+    public ResponseEntity<List<Order>> getOrdersByTableId(@PathVariable Long tableId) {
+        return ResponseEntity.ok(orderService.getOrdersByTableId(tableId));
+    }
 }

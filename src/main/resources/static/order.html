@@ -172,36 +172,39 @@
             cursor: not-allowed;
             box-shadow: none;
         }
+
         /* Profesyonel Bildirim Kutusu */
-#toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
 
-.toast {
-    background: #00B894;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    margin-bottom: 10px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: slideIn 0.5s ease-out;
-}
+        .toast {
+            background: #00B894;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
 
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Toast Bildirim Konteyneri -->
+    <div id="toast-container"></div>
 
     <div class="menu-section">
         <div class="header-bar">
@@ -255,36 +258,60 @@
         let allMenuItems = [];
         let cart = []; // Sepetimiz
 
+        // Toast Bildirim Fonksiyonu
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if (isError) {
+                toast.style.background = '#D63031'; // Hata rengi
+                toast.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${message}`;
+            } else {
+                toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${message}`;
+            }
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000); // 3 saniye sonra kaybolur
+        }
+
         // 1. VERİLERİ ÇEK
         document.addEventListener('DOMContentLoaded', () => {
             fetchCategories();
             fetchMenuItems();
         });
 
-        // Kategorileri Getir
+        // Kategorileri Getir (Token eklendi)
         function fetchCategories() {
-            fetch('/api/categories')
-                .then(res => res.json())
-                .then(categories => {
-                    const container = document.getElementById('category-container');
-                    categories.forEach(cat => {
-                        const btn = document.createElement('button');
-                        btn.className = 'cat-btn';
-                        btn.innerText = cat.name;
-                        btn.onclick = () => filterByCategory(cat.id, btn);
-                        container.appendChild(btn);
-                    });
+            fetch('/api/categories', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(categories => {
+                const container = document.getElementById('category-container');
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-btn';
+                    btn.innerText = cat.name;
+                    btn.onclick = () => filterByCategory(cat.id, btn);
+                    container.appendChild(btn);
                 });
+            })
+            .catch(err => console.error("Kategoriler çekilemedi:", err));
         }
 
-        // Ürünleri Getir
+        // Ürünleri Getir (Token eklendi)
         function fetchMenuItems() {
-            fetch('/api/menu-items')
-                .then(res => res.json())
-                .then(items => {
-                    allMenuItems = items;
-                    renderProducts(allMenuItems);
-                });
+            fetch('/api/menu-items', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(res => res.json())
+            .then(items => {
+                allMenuItems = items;
+                renderProducts(allMenuItems);
+            })
+            .catch(err => console.error("Ürünler çekilemedi:", err));
         }
 
         // 2. ÜRÜNLERİ EKRANA ÇİZ
@@ -371,7 +398,7 @@
         // 4. SİPARİŞİ ONAYLAMA VE VERİTABANINA KAYDETME
         async function submitOrder() {
             if(cart.length === 0) {
-                alert("Önce sepete ürün eklemelisiniz!");
+                showToast("Önce sepete ürün eklemelisiniz!", true);
                 return;
             }
 
@@ -380,32 +407,47 @@
             confirmBtn.disabled = true;
 
             try {
-                // Adım 1: Giriş yapan kullanıcının (Garson) bilgilerini backend'den al
-                const username = localStorage.getItem('username');
-                const userRes = await fetch(`http://localhost:8080/api/users/${username}`, {
+                // ADIM 1: Masanın açık (aktif) bir siparişi var mı kontrol et
+                const checkOrderRes = await fetch(`/api/orders/table/${tableId}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
-                if (!userRes.ok) throw new Error("Kullanıcı bilgisi alınamadı!");
-                const user = await userRes.json();
+                
+                let activeOrder = null;
+                if (checkOrderRes.ok) {
+                    const data = await checkOrderRes.json();
+                    // ÖNEMLİ DÜZELTME: Sadece statüsü TAMAMLANDI *olmayan* siparişleri filtrele
+                    const openOrders = data.filter(o => o.status !== 'TAMAMLANDI');
+                    if (openOrders.length > 0) {
+                        activeOrder = openOrders[openOrders.length - 1]; // En son AÇIK siparişi al
+                    }
+                }
 
-                // Adım 2: Yeni bir "Order" (Sipariş) oluştur
-                const orderRes = await fetch('http://localhost:8080/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        table: { id: tableId },
-                        user: user // İŞTE GÜNCELLEDİĞİMİZ KISIM: Sadece id değil, tüm user objesini gönderiyoruz.
-                    })
-                });
-                if (!orderRes.ok) throw new Error("Sipariş oluşturulamadı!");
-                const order = await orderRes.json();
+                // ADIM 2: Eğer masanın açık siparişi yoksa (Masa BOŞ ise) yeni oluştur
+                if (!activeOrder) {
+                    const username = localStorage.getItem('username');
+                    const userRes = await fetch(`/api/users/${username}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const user = await userRes.json();
 
-                // Adım 3: Sepetteki (cart) her bir ürünü OrderItem olarak veritabanına kaydet
+                    const orderRes = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            table: { id: tableId },
+                            user: user,
+                            status: 'AÇIK' // Yeni siparişi AÇIK statüsüyle başlat
+                        })
+                    });
+                    activeOrder = await orderRes.json();
+                }
+
+                // ADIM 3: Sepetteki ürünleri (OrderItem) AKTİF siparişe bağlayarak kaydet
                 for (const item of cart) {
-                    await fetch('http://localhost:8080/api/order-items', {
+                    await fetch('/api/order-items', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -415,13 +457,13 @@
                             quantity: item.quantity,
                             priceAtOrder: item.price,
                             menuItem: { id: item.id },
-                            order: { id: order.id }
+                            order: { id: activeOrder.id } // Yeni veya mevcut siparişin ID'si
                         })
                     });
                 }
 
-                // Adım 4: Masanın durumunu "DOLU" olarak güncelle
-                await fetch(`http://localhost:8080/api/tables/${tableId}/status?status=DOLU`, {
+                // ADIM 4: Masayı DOLU statüsüne çek
+                await fetch(`/api/tables/${tableId}/status?status=DOLU`, {
                     method: 'PATCH',
                     headers: {
                         'Authorization': 'Bearer ' + token
@@ -429,19 +471,22 @@
                 });
 
                 // Başarılı!
-                alert("Sipariş başarıyla mutfağa iletildi!");
-                window.location.href = '/waiter.html';
+                showToast("Sipariş başarıyla mutfağa iletildi!");
+                
+                // 1.5 saniye bekleyip garson paneline geri dön
+                setTimeout(() => {
+                    window.location.href = '/waiter.html';
+                }, 1500);
 
             } catch (error) {
                 console.error("Sipariş Hatası:", error);
-                alert("Hata: " + error.message);
+                showToast("Hata: " + error.message, true);
                 
                 // Butonu eski haline getir
                 confirmBtn.innerHTML = '<i class="fa-solid fa-bell-concierge"></i> Siparişi Onayla';
                 confirmBtn.disabled = false;
             }
         }
-        
     </script>
 </body>
 </html>

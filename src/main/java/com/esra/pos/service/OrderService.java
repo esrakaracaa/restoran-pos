@@ -30,4 +30,9 @@ public class OrderService {
         order.setStatus(status);
         return orderRepository.save(order);
     }
+    // Masaya göre siparişleri getiren servis metodu
+    public List<Order> getOrdersByTableId(Long tableId) {
+        return orderRepository.findByTableId(tableId); 
+        // (Eğer Order modelinde masa değişkeninin adı 'restaurantTable' ise, metot adını findByRestaurantTableId olarak değiştirmen gerekebilir)
+    }
 }

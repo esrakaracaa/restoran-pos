@@ -2,48 +2,430 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hesap Ödeme | Lezzet Durağı</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Nunito', sans-serif; background-color: #FFF8F3; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .bill-card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        .total-amount { font-size: 40px; font-weight: 800; color: #FF6B6B; margin: 20px 0; }
-        .pay-btn { background: #00B894; color: white; border: none; padding: 15px 30px; border-radius: 15px; font-size: 18px; font-weight: 800; cursor: pointer; width: 100%; }
+        :root {
+            --bg-color: #FFF8F3;
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+            --primary-color: #FF6B6B;
+            --primary-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            --secondary-color: #00B894;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .bill-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 900px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            display: flex;
+            overflow: hidden;
+            height: 80vh;
+        }
+
+        /* SOL TARAF: Adisyon (Fiş) Tasarımı */
+        .receipt-section {
+            flex: 1;
+            background-color: #FAFAFA;
+            padding: 30px;
+            border-right: 2px dashed #DFE6E9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .receipt-header h2 {
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 800;
+            font-size: 24px;
+        }
+
+        .receipt-header p {
+            color: #B2BEC3;
+            margin: 5px 0 0 0;
+            font-weight: 600;
+        }
+
+        .order-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #F1F2F6;
+            font-weight: 600;
+            color: #636E72;
+        }
+
+        .order-item .item-name {
+            flex: 2;
+        }
+
+        .order-item .item-qty {
+            flex: 1;
+            text-align: center;
+        }
+
+        .order-item .item-price {
+            flex: 1;
+            text-align: right;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .receipt-total {
+            border-top: 2px dashed #DFE6E9;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        /* SAĞ TARAF: Ödeme İşlemleri */
+        .payment-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .back-btn {
+            align-self: flex-start;
+            background: white;
+            border: 2px solid #DFE6E9;
+            padding: 8px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            color: #636E72;
+            text-decoration: none;
+            margin-bottom: 30px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .method-card {
+            border: 2px solid #DFE6E9;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 800;
+            color: #636E72;
+        }
+
+        .method-card i {
+            font-size: 30px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .method-card.active {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            background-color: rgba(0, 184, 148, 0.05);
+        }
+
+        .pay-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+
+        .pay-btn:disabled {
+            background: #B2BEC3;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Toast Bildirim */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: #00B894;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="bill-card">
-        <h2 id="tableTitle">Masa Hesabı</h2>
-        <div class="total-amount" id="totalAmount">0.00 ₺</div>
-        <button class="pay-btn" onclick="markAsPaid()">Ödemeyi Al ve Masayı Boşalt</button>
-        <p style="margin-top: 20px; color: #636E72; cursor: pointer;" onclick="window.history.back()">Geri Dön</p>
+
+    <div id="toast-container"></div>
+
+    <div class="bill-container">
+        <!-- SOL TARAF: ADİSYON -->
+        <div class="receipt-section">
+            <div class="receipt-header">
+                <h2>🍽️ Lezzet Durağı</h2>
+                <p id="tableNameDisplay">Masa ...</p>
+            </div>
+
+            <div class="order-items" id="orderItemsContainer">
+                <div style="text-align:center; color:#B2BEC3; margin-top:50px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px;"></i><br><br>
+                    Adisyon Yükleniyor...
+                </div>
+            </div>
+
+            <div class="receipt-total">
+                <span>GENEL TOPLAM:</span>
+                <span id="totalAmountDisplay">0.00 ₺</span>
+            </div>
+        </div>
+
+        <!-- SAĞ TARAF: ÖDEME -->
+        <div class="payment-section">
+            <a href="/waiter.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Geri Dön</a>
+            
+            <div class="section-title">Ödeme Yöntemi</div>
+            <div class="payment-methods">
+                <div class="method-card active" onclick="selectPaymentMethod('NAKİT', this)">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    Nakit
+                </div>
+                <div class="method-card" onclick="selectPaymentMethod('KART', this)">
+                    <i class="fa-solid fa-credit-card"></i>
+                    Kredi Kartı
+                </div>
+            </div>
+
+            <button class="pay-btn" id="payButton" onclick="processPayment()">
+                <i class="fa-solid fa-check-double"></i> Hesabı Kapat
+            </button>
+        </div>
     </div>
 
     <script>
+        // GÜVENLİK VE URL KONTROLÜ
+        const token = localStorage.getItem('jwtToken');
+        if (!token) window.location.href = '/login.html';
+
         const urlParams = new URLSearchParams(window.location.search);
         const tableId = urlParams.get('tableId');
-        const billId = urlParams.get('billId'); // Hesap ID'si
-        const total = urlParams.get('total');
+        const tableName = urlParams.get('tableName');
         
-        document.getElementById('totalAmount').innerText = total + " ₺";
+        document.getElementById('tableNameDisplay').innerText = tableName || "Bilinmeyen Masa";
 
-        async function markAsPaid() {
-            const token = localStorage.getItem('jwtToken');
-            
-            // 1. Faturayı "Ödendi" olarak işaretle
-            await fetch(`http://localhost:8080/api/bills/${billId}/pay`, {
-                method: 'PATCH',
-                headers: { 'Authorization': 'Bearer ' + token }
+        let currentOrderId = null;
+        let finalTotal = 0;
+        let selectedMethod = 'NAKİT'; // Varsayılan ödeme yöntemi
+
+        // Toast Bildirim Fonksiyonu
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.background = isError ? '#D63031' : '#00B894';
+            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // 1. MASANIN AKTİF SİPARİŞİNİ GETİR
+        document.addEventListener('DOMContentLoaded', fetchActiveOrder);
+
+        async function fetchActiveOrder() {
+            try {
+                const response = await fetch(`/api/orders/table/${tableId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) throw new Error("Sipariş verileri alınamadı.");
+                
+                const data = await response.json();
+                let orderItems = [];
+                
+                // ÖNEMLİ DÜZELTME: Sadece AÇIK olan adisyonu ekrana getir
+                if (Array.isArray(data)) {
+                    const activeOrders = data.filter(o => o.status !== 'TAMAMLANDI');
+                    if(activeOrders.length > 0) {
+                        const activeOrder = activeOrders[activeOrders.length - 1]; 
+                        currentOrderId = activeOrder.id;
+                        orderItems = activeOrder.orderItems || [];
+                    }
+                } else {
+                    if(data.status !== 'TAMAMLANDI') {
+                        currentOrderId = data.id;
+                        orderItems = data.orderItems || [];
+                    }
+                }
+
+                renderReceipt(orderItems);
+
+            } catch (error) {
+                console.error("Hata:", error);
+                document.getElementById('orderItemsContainer').innerHTML = 
+                    `<div style="text-align:center; color:#D63031; margin-top:50px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:30px;"></i><br><br>
+                        Adisyon bulunamadı veya bir hata oluştu.
+                    </div>`;
+            }
+        }
+
+        // 2. FİŞİ (ADİSYONU) EKRANA ÇİZ
+        function renderReceipt(items) {
+            const container = document.getElementById('orderItemsContainer');
+            container.innerHTML = '';
+            finalTotal = 0;
+
+            if (!items || items.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#B2BEC3; margin-top:50px;">Adisyonda ürün yok.</div>';
+                document.getElementById('totalAmountDisplay').innerText = "0.00 ₺";
+                return;
+            }
+
+            items.forEach(item => {
+                const price = item.priceAtOrder || (item.menuItem ? item.menuItem.price : 0);
+                const name = item.menuItem ? item.menuItem.name : "Ürün";
+                const qty = item.quantity || 1;
+                const itemTotal = price * qty;
+                
+                finalTotal += itemTotal;
+
+                container.innerHTML += `
+                    <div class="order-item">
+                        <span class="item-name">${name}</span>
+                        <span class="item-qty">x${qty}</span>
+                        <span class="item-price">${itemTotal.toFixed(2)} ₺</span>
+                    </div>
+                `;
             });
 
-            // 2. Masayı "BOŞ" yap
-            await fetch(`http://localhost:8080/api/tables/${tableId}/status?status=BOŞ`, {
-                method: 'PATCH',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+            document.getElementById('totalAmountDisplay').innerText = finalTotal.toFixed(2) + " ₺";
+        }
 
-            alert("Ödeme alındı, masa boşaltıldı!");
-            window.location.href = '/waiter.html';
+        // Ödeme Yöntemi Seçimi Görselliği
+        function selectPaymentMethod(method, element) {
+            selectedMethod = method;
+            document.querySelectorAll('.method-card').forEach(card => card.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // 3. ÖDEMEYİ TAMAMLA VE MASAYI BOŞALT
+        async function processPayment() {
+            if (!currentOrderId) {
+                showToast("Kapatılacak geçerli bir adisyon bulunamadı!", true);
+                return;
+            }
+
+            const payBtn = document.getElementById('payButton');
+            payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> İşleniyor...';
+            payBtn.disabled = true;
+
+            try {
+                // Adım 1: Ödemeyi Kaydet
+                await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        order: { id: currentOrderId },
+                        amount: finalTotal,
+                        paymentMethod: selectedMethod
+                    })
+                });
+
+                // ÖNEMLİ DÜZELTME Adım 1.5: SİPARİŞİ "TAMAMLANDI" OLARAK İŞARETLE
+                await fetch(`/api/orders/${currentOrderId}/status?status=TAMAMLANDI`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                // Adım 2: Masanın statüsünü tekrar "BOŞ" yap
+                await fetch(`/api/tables/${tableId}/status?status=BOŞ`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                // Başarılı!
+                showToast("Hesap başarıyla kapatıldı!");
+                
+                setTimeout(() => {
+                    window.location.href = '/waiter.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error("Ödeme Hatası:", error);
+                showToast("Ödeme alınırken bir hata oluştu!", true);
+                
+                payBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> Hesabı Kapat';
+                payBtn.disabled = false;
+            }
         }
     </script>
 </body>
