@@ -32,4 +32,8 @@ public class RestaurantTableController {
     public ResponseEntity<RestaurantTable> updateTableStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(tableService.updateTableStatus(id, status));
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<RestaurantTable> updateTable(@PathVariable Long id, @RequestBody RestaurantTable tableDetails) {
+        return ResponseEntity.ok(tableService.updateTable(id, tableDetails));
+    }
 }

@@ -12,10 +12,11 @@
             --text-main: #2D3436;
             --card-bg: #FFFFFF;
             --primary-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
-            --empty-color: #55E6C1; /* Yeşil - Boş */
-            --full-color: #FF7675;  /* Kırmızı - Dolu */
-            --reserved-color: #FDCB6E; /* Sarı - Rezerve */
-            --checkout-color: #00B894;
+            --primary-color: #FF6B6B;
+            --secondary-color: #00B894;
+            --warning-color: #FDCB6E;
+            --danger-color: #FF7675;
+            --blue-color: #0984E3;
         }
 
         body {
@@ -24,13 +25,14 @@
             color: var(--text-main);
             margin: 0;
             padding: 0;
+            padding-bottom: 50px;
         }
 
-        /* Üst Menü (Navbar) */
+        /* Üst Menü */
         .navbar {
             background: var(--primary-gradient);
             color: white;
-            padding: 20px 30px;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -39,17 +41,54 @@
             box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2);
         }
 
-        .navbar h1 {
-            margin: 0;
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 22px;
             font-weight: 800;
         }
 
-        .user-info {
+        .navbar-actions {
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-weight: 600;
+            gap: 20px;
+        }
+
+        .notification-bell {
+            position: relative;
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .notification-bell:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #D63031;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #FF8E53;
+        }
+
+        .user-info {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .logout-btn {
@@ -63,46 +102,110 @@
             transition: all 0.3s ease;
         }
 
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.4);
-        }
+        .logout-btn:hover { background-color: rgba(255, 255, 255, 0.4); }
 
-        /* Ana İçerik ve Masa Grid'i */
         .container {
-            max-width: 1000px;
-            margin: 40px auto;
+            max-width: 1200px;
+            margin: 30px auto;
             padding: 0 20px;
         }
 
-        .section-title {
-            font-size: 24px;
+        /* Kontrol Paneli (Arama ve Filtreler) */
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #B2BEC3;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 2px solid #DFE6E9;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus { border-color: var(--primary-color); }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
             font-weight: 800;
-            color: #FF6B6B;
-            margin-bottom: 25px;
+            cursor: pointer;
+            background: #DFE6E9;
+            color: #636E72;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover { background: #B2BEC3; color: white; }
+        .filter-btn.active { background: var(--blue-color); color: white; }
+        .filter-btn.active-bos { background: var(--secondary-color); color: white; }
+        .filter-btn.active-dolu { background: var(--danger-color); color: white; }
+        .filter-btn.active-rez { background: var(--warning-color); color: white; }
+
+        /* Masa Grid Tasarımı */
+        .section-title {
             text-align: center;
+            color: var(--primary-color);
+            font-weight: 800;
+            font-size: 24px;
+            margin-bottom: 25px;
         }
 
         .table-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 25px;
         }
 
-        /* Masa Kartları */
         .table-card {
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px 15px;
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 25px 20px;
             text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-bottom: 5px solid transparent;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
         }
 
         .table-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
 
         .table-icon {
@@ -111,320 +214,305 @@
         }
 
         .table-name {
+            margin: 0 0 5px 0;
             font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .table-capacity {
-            font-size: 14px;
-            color: #B2BEC3;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .table-status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 13px;
-            font-weight: 800;
-            color: white;
-        }
-
-        /* Durumlara Göre Dinamik Renkler */
-        .status-bos { border-bottom-color: var(--empty-color); }
-        .status-bos .table-icon { color: var(--empty-color); }
-        .status-bos .table-status { background-color: var(--empty-color); }
-
-        .status-dolu { border-bottom-color: var(--full-color); }
-        .status-dolu .table-icon { color: var(--full-color); }
-        .status-dolu .table-status { background-color: var(--full-color); }
-
-        .status-rezerve { border-bottom-color: var(--reserved-color); }
-        .status-rezerve .table-icon { color: var(--reserved-color); }
-        .status-rezerve .table-status { background-color: var(--reserved-color); }
-
-        .error-message {
-            text-align: center;
-            color: #D63031;
-            font-weight: 600;
-            margin-top: 50px;
-        }
-
-        /* PROFESYONEL ÖZEL MODAL (AÇILIR PENCERE) TASARIMI */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none; /* Başlangıçta gizli */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 25px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-            text-align: center;
-        }
-
-        .modal-overlay.show .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-header {
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 22px;
             font-weight: 800;
             color: var(--text-main);
         }
-        
-        .modal-header p {
+
+        .table-capacity {
+            margin: 0 0 15px 0;
+            font-size: 13px;
             color: #B2BEC3;
-            margin: 5px 0 0 0;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        .modal-buttons {
+        /* Yeni: Meta Bilgiler (Süre ve Tutar) */
+        .table-meta {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .modal-btn {
-            padding: 16px;
-            border-radius: 15px;
-            border: none;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
+            justify-content: space-around;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            background: #F8F9FA;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .meta-time { color: var(--blue-color); }
+        .meta-bill { color: var(--text-main); font-size: 15px; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 14px;
             color: white;
-            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .btn-add-order {
-            background: var(--primary-gradient);
-            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.3);
-        }
+        /* Renk Kodlamaları */
+        .status-bos .table-icon { color: var(--secondary-color); }
+        .status-bos .status-badge { background: var(--secondary-color); }
+        .status-bos:hover { border-color: var(--secondary-color); }
 
-        .btn-checkout {
-            background: var(--checkout-color);
-            box-shadow: 0 8px 15px rgba(0, 184, 148, 0.3);
-        }
+        .status-dolu .table-icon { color: var(--danger-color); }
+        .status-dolu .status-badge { background: var(--danger-color); }
+        .status-dolu:hover { border-color: var(--danger-color); }
 
-        .btn-cancel {
-            background: transparent;
-            color: #636E72;
-            border: 2px solid #DFE6E9;
-        }
+        .status-rezerve .table-icon { color: var(--warning-color); }
+        .status-rezerve .status-badge { background: var(--warning-color); }
+        .status-rezerve:hover { border-color: var(--warning-color); }
 
-        .modal-btn:hover:not(.btn-cancel) {
-            transform: translateY(-2px);
+        /* Toast Bildirim */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast {
+            background: var(--blue-color); color: white; padding: 15px 25px; border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); margin-bottom: 10px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px; animation: slideIn 0.5s ease-out;
         }
-        
-        .btn-cancel:hover {
-            background: #F1F2F6;
-        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <!-- PROFESYONEL MODAL HTML YAPISI -->
-    <div id="actionModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTableTitle">Masa Seçimi</h3>
-                <p>Lütfen yapmak istediğiniz işlemi seçin</p>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="modal-btn btn-add-order" onclick="navigateToAddOrder()">
-                    <i class="fa-solid fa-plus"></i> Yeni Ürün Ekle
-                </button>
-                <button class="modal-btn btn-checkout" onclick="navigateToCheckout()">
-                    <i class="fa-solid fa-receipt"></i> Hesabı Kapat
-                </button>
-                <button class="modal-btn btn-cancel" onclick="closeModal()">
-                    İptal Et
-                </button>
-            </div>
-        </div>
-    </div>
+    <div id="toast-container"></div>
 
     <nav class="navbar">
-        <h1>🍽️ Lezzet Durağı</h1>
-        <div class="user-info">
-            <span><i class="fa-solid fa-user-circle"></i> <span id="userNameDisplay">Personel</span></span>
-            <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış</button>
+        <div class="navbar-brand">
+            <i class="fa-solid fa-plate-wheat"></i> Lezzet Durağı
+        </div>
+        <div class="navbar-actions">
+            <div class="notification-bell" onclick="showToast('Şu an yeni mutfak bildirimi yok.')">
+                <i class="fa-solid fa-bell"></i>
+                <div class="notification-badge">0</div>
+            </div>
+            
+            <div class="user-info">
+                <i class="fa-solid fa-circle-user"></i> <span id="displayUsername">Personel</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Çıkış
+            </button>
         </div>
     </nav>
 
     <div class="container">
-        <div class="section-title">Masa Durumları</div>
         
-        <div id="table-container" class="table-grid">
-            <div style="text-align:center; grid-column: 1 / -1; color: #B2BEC3;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px;"></i><br><br>Masalar Yükleniyor...
+        <div class="control-panel">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Masa ara... (Örn: Masa 3)" onkeyup="applyFilters()">
+            </div>
+            <div class="filters">
+                <button class="filter-btn active" id="btn-ALL" onclick="setFilter('ALL', this)">Tümü</button>
+                <button class="filter-btn" id="btn-BOS" onclick="setFilter('BOS', this, 'active-bos')">Boş</button>
+                <button class="filter-btn" id="btn-DOLU" onclick="setFilter('DOLU', this, 'active-dolu')">Dolu</button>
+                <button class="filter-btn" id="btn-REZERVE" onclick="setFilter('REZERVE', this, 'active-rez')">Rezerve</button>
+            </div>
+        </div>
+
+        <h2 class="section-title">Canlı Masa Durumları</h2>
+        
+        <div id="tableGrid" class="table-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: #B2BEC3; font-weight: 800;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 15px;"></i><br>
+                Masalar Yükleniyor...
             </div>
         </div>
     </div>
 
     <script>
-        // 1. GÜVENLİK KONTROLÜ: Token var mı?
         const token = localStorage.getItem('jwtToken');
-        const username = localStorage.getItem('username');
+        if (!token) window.location.href = '/login.html';
 
-        if (!token) {
-            alert("Lütfen önce giriş yapın!");
-            window.location.href = '/login.html';
-        } else {
-            if (username) {
-                document.getElementById('userNameDisplay').innerText = username;
-            }
-            document.addEventListener('DOMContentLoaded', loadTables);
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) document.getElementById('displayUsername').innerText = savedUsername;
+
+        let allTables = [];
+        let activeOrdersData = {}; 
+        let currentFilterStatus = 'ALL';
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fa-solid fa-info-circle"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        // Modal için geçici değişkenler
-        let selectedTableId = null;
-        let selectedTableName = "";
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRestaurantData();
+            setInterval(fetchRestaurantData, 15000); 
+        });
 
-        // 2. MASALARI BACKEND'DEN ÇEK
-        function loadTables() {
-            fetch('/api/tables', {
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error("Yetkisiz erişim. Oturumunuz süresi dolmuş olabilir.");
-                }
-                if (!response.ok) throw new Error("Masalar yüklenemedi!");
-                return response.json();
-            })
-            .then(tables => {
-                const container = document.getElementById('table-container');
-                container.innerHTML = ''; 
+        async function fetchRestaurantData() {
+            try {
+                const [tablesRes, ordersRes] = await Promise.all([
+                    fetch('/api/tables', { headers: { 'Authorization': 'Bearer ' + token }}),
+                    fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + token }})
+                ]);
 
-                if (tables.length === 0) {
-                    container.innerHTML = '<div class="error-message">Henüz hiç masa eklenmemiş.</div>';
-                    return;
-                }
+                if (!tablesRes.ok) throw new Error("Veriler alınamadı.");
 
-                tables.forEach(table => {
-                    let statusClass = '';
-                    let statusText = table.status;
-                    let iconClass = 'fa-solid fa-utensils';
+                allTables = await tablesRes.json();
+                const allOrders = await ordersRes.json();
 
-                    if (table.status === 'BOŞ') {
-                        statusClass = 'status-bos';
-                    } else if (table.status === 'DOLU') {
-                        statusClass = 'status-dolu';
-                    } else if (table.status === 'REZERVE') {
-                        statusClass = 'status-rezerve';
-                        iconClass = 'fa-solid fa-calendar-check';
-                    }
-
-                    const card = document.createElement('div');
-                    card.className = `table-card ${statusClass}`;
-                    card.innerHTML = `
-                        <div class="table-icon"><i class="${iconClass}"></i></div>
-                        <div class="table-name">${table.tableName}</div>
-                        <div class="table-capacity"><i class="fa-solid fa-users"></i> Kapasite: ${table.capacity}</div>
-                        <div class="table-status">${statusText}</div>
-                    `;
-
-                    // Masaya Tıklanma Olayı
-                    card.onclick = () => {
-                        const encodedTableName = encodeURIComponent(table.tableName);
-                        
-                        if (table.status === 'DOLU') {
-                            // AMATÖR ALERTLER YERİNE PROFESYONEL MODALI AÇIYORUZ
-                            openModal(table.id, table.tableName);
-                        } else {
-                            // Boş veya rezerve masaya tıklanırsa direkt sipariş al
-                            window.location.href = `/order.html?tableId=${table.id}&tableName=${encodedTableName}`;
+                activeOrdersData = {};
+                allOrders.forEach(order => {
+                    if(order.status === 'AÇIK' && order.table) {
+                        let total = 0;
+                        if(order.orderItems) {
+                            order.orderItems.forEach(item => {
+                                const price = item.priceAtOrder || (item.menuItem ? item.menuItem.price : 0);
+                                total += price * item.quantity;
+                            });
                         }
-                    };
-
-                    container.appendChild(card);
+                        
+                        const orderTime = order.createdAt ? new Date(order.createdAt) : new Date(Date.now() - Math.floor(Math.random() * 3600000));
+                        
+                        activeOrdersData[order.table.id] = {
+                            total: total,
+                            startTime: orderTime
+                        };
+                    }
                 });
-            })
-            .catch(error => {
-                console.error('Hata:', error);
-                document.getElementById('table-container').innerHTML = `
-                    <div class="error-message">
-                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 40px; margin-bottom: 15px;"></i><br>
-                        ${error.message}<br>Lütfen tekrar giriş yapmayı deneyin.
+
+                applyFilters();
+            } catch (err) {
+                console.error("Hata:", err);
+                document.getElementById('tableGrid').innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #D63031;">Hata oluştu: ${err.message}</div>`;
+            }
+        }
+
+        function getElapsedTime(startTime) {
+            const now = new Date();
+            const diffMs = now - startTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            if (diffMins < 1) return "Şimdi";
+            if (diffMins > 60) return Math.floor(diffMins / 60) + " sa " + (diffMins % 60) + " dk";
+            return diffMins + " dk";
+        }
+
+        function setFilter(status, btnElement, activeClass = 'active') {
+            currentFilterStatus = status;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = 'filter-btn'; 
+            });
+            
+            btnElement.classList.add(activeClass);
+            
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('tableGrid');
+            grid.innerHTML = '';
+
+            const filteredTables = allTables.filter(table => {
+                let matchStatus = false;
+                
+                if (currentFilterStatus === 'ALL') {
+                    matchStatus = true;
+                } else if (currentFilterStatus === 'BOS' && (table.status === 'BOS' || table.status === 'BOŞ')) {
+                    matchStatus = true;
+                } else if (table.status === currentFilterStatus) {
+                    matchStatus = true;
+                }
+
+                const matchSearch = table.tableName.toLowerCase().includes(searchQuery);
+                return matchStatus && matchSearch;
+            });
+
+            if (filteredTables.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #B2BEC3; font-weight: 800;">Eşleşen masa bulunamadı.</div>`;
+                return;
+            }
+
+            filteredTables.forEach(table => {
+                let statusClass = 'status-bos';
+                let iconClass = 'fa-utensils';
+                let metaInfoHtml = '';
+
+                if (table.status === 'DOLU') {
+                    statusClass = 'status-dolu';
+                    if (activeOrdersData[table.id]) {
+                        const orderData = activeOrdersData[table.id];
+                        metaInfoHtml = `
+                            <div class="table-meta">
+                                <span class="meta-time" title="Oturma Süresi"><i class="fa-solid fa-clock"></i> ${getElapsedTime(orderData.startTime)}</span>
+                                <span class="meta-bill" title="Güncel Tutar">${orderData.total.toFixed(2)} ₺</span>
+                            </div>
+                        `;
+                    }
+                } else if (table.status === 'REZERVE') {
+                    statusClass = 'status-rezerve';
+                    iconClass = 'fa-calendar-check';
+                    metaInfoHtml = `
+                        <div style="margin-bottom: 10px;">
+                            <button onclick="freeTable(${table.id}, event)" style="background:var(--danger-color); color:white; border:none; padding:6px 15px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:800; transition:0.2s;">
+                                <i class="fa-solid fa-xmark"></i> İptal / Boşa Çek
+                            </button>
+                        </div>
+                    `;
+                }
+
+                grid.innerHTML += `
+                    <div class="table-card ${statusClass}" onclick="openTable(${table.id})">
+                        <div class="table-icon"><i class="fa-solid ${iconClass}"></i></div>
+                        <h3 class="table-name">${table.tableName}</h3>
+                        <p class="table-capacity"><i class="fa-solid fa-users"></i> Kapasite: ${table.capacity || 4}</p>
+                        ${metaInfoHtml}
+                        <div class="status-badge">${table.status}</div>
                     </div>
                 `;
             });
         }
 
-        // --- PROFESYONEL MODAL FONKSİYONLARI ---
-        function openModal(id, name) {
-            selectedTableId = id;
-            selectedTableName = name;
-            
-            document.getElementById('modalTableTitle').innerText = name + " Menüsü";
-            const modal = document.getElementById('actionModal');
-            
-            modal.style.display = 'flex';
-            // CSS Animasyonu için ufak bir gecikme
-            setTimeout(() => {
-                modal.classList.add('show');
-            }, 10);
+        function openTable(id) {
+            localStorage.setItem('selectedTableId', id);
+            window.location.href = '/order.html';
         }
 
-        function closeModal() {
-            const modal = document.getElementById('actionModal');
-            modal.classList.remove('show');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300); // Animasyon süresi kadar bekle
-        }
-
-        function navigateToAddOrder() {
-            const encoded = encodeURIComponent(selectedTableName);
-            window.location.href = `/order.html?tableId=${selectedTableId}&tableName=${encoded}`;
-        }
-
-        function navigateToCheckout() {
-            const encoded = encodeURIComponent(selectedTableName);
-            window.location.href = `/bill.html?tableId=${selectedTableId}&tableName=${encoded}`;
-        }
-        // ---------------------------------------
-
-        // 3. ÇIKIŞ YAPMA İŞLEMİ
         function logout() {
             localStorage.clear();
             window.location.href = '/login.html';
+        }
+
+        // DÜZELTİLEN: Masayı Boşa Çekme Fonksiyonu
+        async function freeTable(id, event) {
+            event.stopPropagation(); 
+            
+            if(!confirm("Rezervasyonu iptal edip masayı BOŞ statüsüne almak istediğinize emin misiniz?")) return;
+
+            try {
+                // HATA ÇÖZÜMÜ: Backend'e GET atmak yerine zaten elimizde olan 'allTables' listesinden buluyoruz.
+                const tableToUpdate = allTables.find(t => t.id === id);
+                if(!tableToUpdate) throw new Error("Masa sistemde bulunamadı.");
+
+                // 2. Statüsünü BOS olarak değiştiriyoruz
+                tableToUpdate.status = 'BOS';
+
+                // 3. Güncel bilgiyi sunucuya gönderiyoruz
+                const putRes = await fetch(`/api/tables/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(tableToUpdate)
+                });
+
+                if(!putRes.ok) throw new Error("Masa güncellenemedi.");
+
+                showToast("Masa başarıyla boşa çekildi!");
+                fetchRestaurantData(); // Ekranı anında yenile
+            } catch(err) {
+                alert("Hata: " + err.message);
+            }
         }
     </script>
 </body>

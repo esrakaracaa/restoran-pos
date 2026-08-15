@@ -1,9 +1,11 @@
 package com.esra.pos.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.esra.pos.model.RestaurantTable;
 import com.esra.pos.repository.RestaurantTableRepository;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class RestaurantTableService {
@@ -27,5 +29,16 @@ public class RestaurantTableService {
                 .orElseThrow(() -> new RuntimeException("Masa bulunamadı!"));
         table.setStatus(status);
         return tableRepository.save(table);
+    }
+    public RestaurantTable updateTable(Long id, RestaurantTable tableDetails) {
+        // Masayı veritabanından bul
+        RestaurantTable existingTable = tableRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Masa bulunamadı!"));
+
+        // Sadece statüsünü yeni gelen veriyle değiştir (BOS, DOLU, REZERVE)
+        existingTable.setStatus(tableDetails.getStatus());
+
+        // Güncellenmiş halini kaydet
+        return tableRepository.save(existingTable);
     }
 }
