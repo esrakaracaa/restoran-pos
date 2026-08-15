@@ -27,11 +27,11 @@ public class SecurityConfig {
         http
             .cors().and().csrf().disable()
             .authorizeHttpRequests()
-                // 1. ÖN YÜZ DOSYALARI İÇİN GENİŞLETİLMİŞ İZİNLER
+                // 1. ÖN YÜZ DOSYALARI İÇİN GENİŞLETİLMİŞ İZİNLER (Müşteri Menüsü Dahil)
                 .requestMatchers(
                     "/", 
                     "/index.html", 
-                    "/**/*.html",  // Tüm klasörlerdeki HTML dosyaları
+                    "/**/*.html",  // Tüm klasörlerdeki HTML dosyaları (menu.html dahil)
                     "/**/*.css",   // Tüm klasörlerdeki CSS dosyaları
                     "/**/*.js",    // Tüm klasörlerdeki JS dosyaları
                     "/images/**",  // İleride eklenebilecek görseller
@@ -39,13 +39,13 @@ public class SecurityConfig {
                     "/error"       // Olası arka plan hatalarını 403 yerine görebilmek için
                 ).permitAll()
 
-                // 2. HERKESE AÇIK API YOLLARI
+                // 2. HERKESE AÇIK API YOLLARI (Giriş yapmadan veri okuma)
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/menu-items/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tables/**").permitAll()
                 
-                // 3. DİĞER TÜM İŞLEMLER İÇİN TOKEN ZORUNLU
+                // 3. DİĞER TÜM İŞLEMLER İÇİN TOKEN (GARSON/ADMİN ŞİFRESİ) ZORUNLU
                 .anyRequest().authenticated()
             .and()
             .sessionManagement()

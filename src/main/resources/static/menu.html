@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijital Menü | Lezzet Durağı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FFF8F3;
+            --text-main: #2D3436;
+            --card-bg: #FFFFFF;
+            --primary-color: #FF6B6B;
+            --primary-gradient: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            --secondary-color: #00B894;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 50px;
+        }
+
+        /* Kapak (Hero) Alanı */
+        .hero-section {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .hero-section h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .hero-section p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Kategori Menüsü (Yatay Kaydırılabilir) */
+        .category-scroll {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            scrollbar-width: none; /* Firefox için */
+        }
+        .category-scroll::-webkit-scrollbar {
+            display: none; /* Chrome/Safari için */
+        }
+
+        .cat-btn {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #636E72;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .cat-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 8px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Ürün Listesi */
+        .products-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            border-left: 5px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
+
+        .product-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .product-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #B2BEC3;
+            font-weight: 600;
+        }
+
+        .product-price {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--secondary-color);
+            background: rgba(0, 184, 148, 0.1);
+            padding: 8px 15px;
+            border-radius: 15px;
+        }
+
+        /* Yükleniyor ve Boş Durumu */
+        .loading-state {
+            text-align: center;
+            color: #B2BEC3;
+            padding: 50px 0;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+        <h1>🍽️ Lezzet Durağı</h1>
+        <p>Dijital Menümüze Hoş Geldiniz</p>
+    </div>
+
+    <div class="container">
+        <!-- Kategoriler -->
+        <div id="categoryContainer" class="category-scroll">
+            <button class="cat-btn active" onclick="filterMenu('ALL', this)">Tümü</button>
+        </div>
+
+        <!-- Ürünler -->
+        <div id="productsContainer" class="products-grid">
+            <div class="loading-state">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 15px;"></i><br>
+                Lezzetler Yükleniyor...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allMenuItems = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // DİKKAT: Burada token göndermiyoruz çünkü müşterinin token'ı yok!
+            fetchCategories();
+            fetchMenuItems();
+        });
+
+        // 1. Kategorileri Çek
+        async function fetchCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                if(!response.ok) throw new Error("Kategoriler alınamadı");
+                const categories = await response.json();
+                
+                const container = document.getElementById('categoryContainer');
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-btn';
+                    btn.innerText = cat.name;
+                    btn.onclick = () => filterMenu(cat.id, btn);
+                    container.appendChild(btn);
+                });
+            } catch (error) {
+                console.error("Kategori Hatası:", error);
+            }
+        }
+
+        // 2. Ürünleri Çek
+        async function fetchMenuItems() {
+            try {
+                const response = await fetch('/api/menu-items');
+                if(!response.ok) throw new Error("Ürünler alınamadı");
+                allMenuItems = await response.json();
+                
+                renderProducts(allMenuItems);
+            } catch (error) {
+                console.error("Ürün Hatası:", error);
+                document.getElementById('productsContainer').innerHTML = `
+                    <div class="loading-state" style="color:#D63031;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size:30px;"></i><br><br>
+                        Menü yüklenirken bir hata oluştu.
+                    </div>
+                `;
+            }
+        }
+
+        // 3. Ürünleri Ekrana Çiz
+        function renderProducts(items) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="loading-state">Bu kategoride henüz ürün bulunmuyor.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const categoryName = item.category ? item.category.name : '';
+                container.innerHTML += `
+                    <div class="product-card">
+                        <div class="product-info">
+                            <h3>${item.name}</h3>
+                            <p>${categoryName}</p>
+                        </div>
+                        <div class="product-price">${item.price.toFixed(2)} ₺</div>
+                    </div>
+                `;
+            });
+        }
+
+        // 4. Kategori Filtreleme
+        function filterMenu(categoryId, btnElement) {
+            // Buton renklerini ayarla
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Ürünleri filtrele
+            if (categoryId === 'ALL') {
+                renderProducts(allMenuItems);
+            } else {
+                const filtered = allMenuItems.filter(item => item.category && item.category.id === categoryId);
+                renderProducts(filtered);
+            }
+        }
+    </script>
+</body>
+</html>
